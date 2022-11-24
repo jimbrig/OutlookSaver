@@ -35,11 +35,86 @@ Sub InitConfig()
     Debug.Print "[CONFIG]: Setting AddSenderToFileNames set to " & CStr(Cfg.AddSenderToFileNames)
     Debug.Print "[CONFIG]: Setting AddSubjectToFileNames set to " & CStr(Cfg.AddSubjectToFileNames)
     Debug.Print "[CONFIG]: NOTE - Configuration Values stored in Registry under path " & _
-            "Computer\HKEY_CURRENT_USER\Software\VB and VBA Program Settings\<OutlookSaver>\Config"
+            "Computer\HKEY_CURRENT_USER\Software\VB and VBA Program Settings\OutlookSaver\Config"
             
     SaveSetting appName:=APP_NAME, Section:="Config", Key:="LastUpdated", Setting:=Format(Now(), "yyyy-MM-dd hh:mm:ss")
 
 End Sub
+
+Public Function ChooseDefaultSavePath(Optional WhatIf As Boolean = False) As Long
+
+  Dim ChosenPath As String
+  Dim FolderPicker As FileDialog
+  Dim Validation As Long
+  Dim Result As Long
+  
+  Set FolderPicker = Word.Application.FileDialog(msoFileDialogFolderPicker)
+  
+  With FolderPicker
+    .Title = "[OutlookSaver AddIn] Select Default Save Directory:"
+    .AllowMultiSelect = False
+    
+    If .Show <> -1 Then
+      MsgBox "[WARN] Exited due to User Cancellation of the Process."
+      ChooseDefaultSavePath = 1
+      Exit Function
+    End If
+    
+    ChosenPath = .SelectedItems(1) & "\"
+    
+  End With
+  
+  Validation = ValidatePath(ChosenPath)
+    
+  If Validation = False Then
+    MsgBox "[Error] Path did not pass validation. Exiting."
+    ChooseDefaultSavePath = 1
+    Exit Function
+  End If
+  
+  Result = SetDefaultSavePath(ChosenPath)
+  
+  If Result <> 0 Then
+    
+  End If
+  
+  MsgBox "Successfully updated the default SavePath to be: " & ChosenPath & "!", vbInformation
+  Set FolderPicker = Nothing
+  ChooseDefaultSavePath = 0
+  Exit Function
+
+End Function
+
+Public Function SetDefaultSavePath(Path As String, Optional WhatIf As Boolean = False) As Long
+
+  Dim OldPath As String: OldPath = GetSetting(appName:=APP_NAME, Section:="Config", Key:="EmailSavePath", Default:=DEFAULT_SAVE_EMAIL_PATH)
+  Dim Validation As Boolean: Validation = ValidatePath(Path)
+   
+  If Validation = False Then
+    MsgBox "[ERROR]: Error setting the default save path due to the specified folder not being valid or not existing. Exiting."
+    SetDefaultSavePath = 1
+    Exit Function
+  End If
+  
+  If WhatIf = True Then
+    Debug.Print "[INFO]: WhatIf Flag used - would change the default save path as follow:" & vbNewLine & "From: " & OldPath & vbNewLine & "To: " & Path
+    SetDefaultSavePath = 0
+    Exit Function
+  End If
+
+  Dim Cfg As Config
+    
+  With Cfg
+    .EmailSavePath = GetSetting(appName:=APP_NAME, Section:="Config", Key:="EmailSavePath", Default:=Path)
+  End With
+    
+  SaveSetting appName:=APP_NAME, Section:="Config", Key:="EmailSavePath", Setting:=Cfg.EmailSavePath
+  SaveSetting appName:=APP_NAME, Section:="Config", Key:="LastUpdated", Setting:=Format(Now(), "yyyy-MM-dd hh:mm:ss")
+    
+  SetDefaultSavePath = 0
+  Exit Function
+  
+End Function
 
 Public Sub ListConfigs()
 
@@ -50,7 +125,7 @@ Public Sub ListConfigs()
     
     Debug.Print "-----------------------"
     Debug.Print "[CONFIG]: All Settings:"
-    Debug.Print "[CONFIG]: HKEY_CURRENT_USER\Software\VB and VBA Program Settings\<OutlookSaver>\Config"
+    Debug.Print "[CONFIG]: HKEY_CURRENT_USER\Software\VB and VBA Program Settings\OutlookSaver\Config"
     Debug.Print "-----------------------"
     
     For i = LBound(Settings, 1) To UBound(Settings, 1)
