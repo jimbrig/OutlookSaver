@@ -11,26 +11,25 @@
 *.OTD linguist-binary=true
 
 [*.bas]
-indent_size = 2
-indent_style = space
-trim_trailing_whitespace = true
-insert_final_newline = true
+indent_size=2
+indent_style=space
+trim_trailing_whitespace=true
+insert_final_newline=true
 
 [*.cls]
-indent_size = 2
-indent_style = space
-trim_trailing_whitespace = true
-insert_final_newline = true
+indent_size=2
+indent_style=space
+trim_trailing_whitespace=true
+insert_final_newline=true
 
 [*.xml]
-indent_size = 2
-indent_style = space
-trim_trailing_whitespace = true
-insert_final_newline = true
+indent_size=2
+indent_style=space
+trim_trailing_whitespace=true
+insert_final_newline=true
 
 [*.xaml]
-indent_size = 2
-indent_style = space
-trim_trailing_whitespace = true
-insert_final_newline = true
-
+indent_size=2
+indent_style=space
+trim_trailing_whitespace=true
+insert_final_newline=true
